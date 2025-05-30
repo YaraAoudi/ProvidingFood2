@@ -24,7 +24,6 @@ namespace ProvidingFood2.Controllers
 			return Ok(restaurants);
 		}
 
-
 		[HttpPost("restaurant")]
 		public async Task<IActionResult> AddRestaurantUser([FromBody] RestaurantUserDto dto)
 		{
@@ -35,8 +34,7 @@ namespace ProvidingFood2.Controllers
 					FullName = dto.FullName,
 					Email = dto.Email,
 					Password = dto.Password,
-					PhoneNumber = dto.PhoneNumber,
-					UserTypeId = dto.UserTypeId
+					PhoneNumber = dto.PhoneNumber
 				};
 
 				var restaurant = new Restaurant
@@ -44,11 +42,12 @@ namespace ProvidingFood2.Controllers
 					RestaurantName = dto.RestaurantName,
 					RestaurantEmail = dto.RestaurantEmail,
 					RestaurantPhone = dto.RestaurantPhone,
-					RestaurantAddress = dto.RestaurantAddress,
-					CategoryId = dto.CategoryId
+					RestaurantAddress = dto.RestaurantAddress 
 				};
 
-				bool result = await _restaurantRepository.AddRestaurantUserAsync(user, restaurant);
+				
+				bool result = await _restaurantRepository.AddRestaurantUserAsync(user, restaurant, dto.UserTypeName, dto.CategoryName);
+
 				return result ? Ok("تمت الإضافة بنجاح") : StatusCode(500, "فشل في الإضافة");
 			}
 			catch (Exception ex)
@@ -56,6 +55,7 @@ namespace ProvidingFood2.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
+
 
 
 		[HttpDelete("delete/{userId}")]
@@ -84,7 +84,7 @@ namespace ProvidingFood2.Controllers
 			}
 			catch (System.Exception ex)
 			{
-				// تسجيل الخطأ في نظام التسجيل (Logging)
+				
 
 
 				return StatusCode(500, new
@@ -104,7 +104,7 @@ namespace ProvidingFood2.Controllers
 
 			try
 			{
-				// تحويل DTO إلى كائنات User و Restaurant (قد تحتوي فقط على بعض الحقول)
+				
 				var user = new User
 				{
 					UserId = dto.User.UserId,

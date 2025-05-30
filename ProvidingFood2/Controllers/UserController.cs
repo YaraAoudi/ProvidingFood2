@@ -17,6 +17,26 @@ namespace ProvidingFood2.Controllers
 			_userRepository = userRepository;
 		}
 
+		[HttpPost("register")]
+		public async Task<IActionResult> RegisterDonor ( UserDto request)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			var user = new User
+			{
+				FullName = request.FullName,
+				Email = request.Email,
+				Password = request.Password,
+				PhoneNumber = request.PhoneNumber
+			};
+
+			int userId = await _userRepository.AddBaseUserAsync(user, "Donor");
+
+			return Ok(new { message = "تم تسجيل المتبرع بنجاح", userId });
+		}
+
+
 		[HttpPost("login")]
 
 		public async Task<IActionResult> Login([FromBody] LoginDto loginDto)

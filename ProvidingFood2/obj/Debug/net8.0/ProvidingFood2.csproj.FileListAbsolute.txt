@@ -39,3 +39,4 @@ C:\Users\97158\source\repos\ProvidingFood2\ProvidingFood2\obj\Debug\net8.0\refin
 C:\Users\97158\source\repos\ProvidingFood2\ProvidingFood2\obj\Debug\net8.0\ProvidingFood2.pdb
 C:\Users\97158\source\repos\ProvidingFood2\ProvidingFood2\obj\Debug\net8.0\ProvidingFood2.genruntimeconfig.cache
 C:\Users\97158\source\repos\ProvidingFood2\ProvidingFood2\obj\Debug\net8.0\ref\ProvidingFood2.dll
+C:\Users\97158\source\repos\ProvidingFood2\ProvidingFood2\obj\Debug\net8.0\ProvidingFood2.sourcelink.json

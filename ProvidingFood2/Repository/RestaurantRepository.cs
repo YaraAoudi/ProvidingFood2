@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using ProvidingFood2.Model;
 using System.Data.SqlClient;
+using BCrypt.Net;
 
 namespace ProvidingFood2.Repository
 {
@@ -25,71 +26,88 @@ namespace ProvidingFood2.Repository
 		}
 
 		///////////////////function to Add all User in User Table/////////////////////////////
-		private async Task<int> AddBaseUserAsync(User user)
+		private async Task<int> AddBaseUserAsync(User user, string userTypeName)
 		{
-			// التحقق من وجود UserTypeId في جدول UserType
-			using (var connection = new SqlConnection(_connectionString))   
+			using (var connection = new SqlConnection(_connectionString))
 			{
 				await connection.OpenAsync();
 
-				// التحقق من صحة UserTypeId
-				string checkUserTypeQuery = "SELECT COUNT(1) FROM UserType WHERE UserTypeId = @UserTypeId";
-				var userTypeExists = await connection.ExecuteScalarAsync<bool>(checkUserTypeQuery, new { user.UserTypeId });
+				// جلب UserTypeId بناءً على اسم النوع
+				string getUserTypeIdQuery = "SELECT UserTypeId FROM UserType WHERE TypeName = @UserTypeName";
+				var userTypeId = await connection.ExecuteScalarAsync<int?>(getUserTypeIdQuery, new { UserTypeName = userTypeName });
 
-				if (!userTypeExists)
+				if (userTypeId == null)
 				{
-					throw new ArgumentException("UserTypeId غير موجود في جدول UserType");
+					throw new ArgumentException("UserTypeName غير موجود في جدول UserType");
 				}
 
-				// إدخال المستخدم بدون Address
-				string query = @"INSERT INTO [User] 
-                         (fullName, email, password, phoneNumber, UserTypeId)
-                         VALUES (@FullName, @Email, @Password, @PhoneNumber, @UserTypeId);
-                         SELECT CAST(SCOPE_IDENTITY() as int);";
+				// تشفير كلمة المرور
+				string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
+				// إدخال المستخدم
+				string query = @"
+			INSERT INTO [User] 
+				(fullName, email, password, phoneNumber, UserTypeId)
+			VALUES 
+				(@FullName, @Email, @Password, @PhoneNumber, @UserTypeId);
+			SELECT CAST(SCOPE_IDENTITY() as int);";
 
 				var parameters = new
 				{
 					user.FullName,
 					user.Email,
-					user.Password,
+					Password = hashedPassword,
 					user.PhoneNumber,
-					user.UserTypeId
+					UserTypeId = userTypeId
 				};
 
 				return await connection.ExecuteScalarAsync<int>(query, parameters);
 			}
 		}
 
-
 		///////////////////function to Add all restaurant in Restaurant Table/////////////////////////////
-		public async Task<bool> AddRestaurantUserAsync(User user, Restaurant restaurant)
+		public async Task<bool> AddRestaurantUserAsync(User user, Restaurant restaurant, string userTypeName, string categoryName)
 		{
-			
-			using (var connection = new SqlConnection(_connectionString))
+			// جلب CategoryId من CategoryName
+			int? categoryId;
+
+			await using (var connection = new SqlConnection(_connectionString))
 			{
 				await connection.OpenAsync();
 
-				
-				string checkCategoryQuery = "SELECT COUNT(1) FROM Category WHERE CategoryId = @CategoryId";
-				var categoryExists = await connection.ExecuteScalarAsync<bool>(checkCategoryQuery, new { restaurant.CategoryId });
+				string getCategoryIdQuery = "SELECT CategoryId FROM Category WHERE Name = @CategoryName";
+				categoryId = await connection.ExecuteScalarAsync<int?>(getCategoryIdQuery, new { CategoryName = categoryName });
 
-				if (!categoryExists)
+				if (categoryId == null)
 				{
-					throw new ArgumentException("CategoryId غير موجود في جدول Category");
+					throw new ArgumentException("اسم التصنيف غير موجود في جدول Category");
 				}
 			}
 
-			int userId = await AddBaseUserAsync(user);
+			// إضافة المستخدم بناءً على UserTypeName
+			int userId = await AddBaseUserAsync(user, userTypeName);
 
-			using (var connection = new SqlConnection(_connectionString))
+			await using (var connection = new SqlConnection(_connectionString))
 			{
 				await connection.OpenAsync();
-				string query = @"INSERT INTO [Restaurant] 
-                        (UserId, RestaurantName,RestaurantEmail , RestaurantPhone, Address, CategoryId)
-                        VALUES (@UserId, @RestaurantName, @RestaurantEmail, @RestaurantPhone, @RestaurantAddress, @CategoryId);";
 
-				restaurant.UserId = userId;
-				int rows = await connection.ExecuteAsync(query, restaurant);
+				string insertRestaurantQuery = @"
+			INSERT INTO [Restaurant] 
+				(UserId, RestaurantName, RestaurantEmail, RestaurantPhone, Address, CategoryId)
+			VALUES 
+				(@UserId, @RestaurantName, @RestaurantEmail, @RestaurantPhone, @Address, @CategoryId);";
+
+				var parameters = new
+				{
+					UserId = userId,
+					RestaurantName = restaurant.RestaurantName,
+					RestaurantEmail = restaurant.RestaurantEmail,
+					RestaurantPhone = restaurant.RestaurantPhone,
+					Address = restaurant.RestaurantAddress,
+					CategoryId = categoryId
+				};
+
+				int rows = await connection.ExecuteAsync(insertRestaurantQuery, parameters);
 				return rows > 0;
 			}
 		}
@@ -158,7 +176,7 @@ namespace ProvidingFood2.Repository
 				{
 					try
 					{
-						// 1. قراءة القيم القديمة من الجدول
+					
 						var existingUser = await connection.QuerySingleOrDefaultAsync<User>(
 							"SELECT * FROM [User] WHERE UserId = @UserId",
 							new { UserId = newUser.UserId }, transaction);
@@ -170,7 +188,7 @@ namespace ProvidingFood2.Repository
 						if (existingUser == null || existingRestaurant == null)
 							return false;
 
-						// 2. دمج القيم: الجديدة إذا موجودة، وإلا نستخدم القديمة
+						
 						newUser.FullName = KeepOldIfEmpty(newUser.FullName, existingUser.FullName);
 						newUser.Email = KeepOldIfEmpty(newUser.Email, existingUser.Email);
 						newUser.PhoneNumber = KeepOldIfEmpty(newUser.PhoneNumber, existingUser.PhoneNumber);
@@ -181,7 +199,7 @@ namespace ProvidingFood2.Repository
 						newRestaurant.RestaurantPhone = KeepOldIfEmpty(newRestaurant.RestaurantPhone, existingRestaurant.RestaurantPhone);
 						newRestaurant.RestaurantAddress = KeepOldIfEmpty(newRestaurant.RestaurantAddress, existingRestaurant.RestaurantAddress);
 
-						// 3. تنفيذ التحديث باستخدام الحقول المدموجة
+						
 						string updateUserQuery = @"UPDATE [User] SET 
 						FullName = @FullName, 
 						Email = @Email, 

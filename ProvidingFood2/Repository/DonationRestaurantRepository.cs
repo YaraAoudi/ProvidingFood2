@@ -50,7 +50,6 @@ namespace ProvidingFood2.Repository
 			{
 				await connection.OpenAsync();
 
-				// 1. الحصول على restaurantId من الاسم
 				var restaurantId = await connection.QueryFirstOrDefaultAsync<int?>(
 					"SELECT RestaurantId FROM Restaurant WHERE RestaurantName = @RestaurantName",
 					new { RestaurantName = restaurantName });
@@ -58,7 +57,6 @@ namespace ProvidingFood2.Repository
 				if (restaurantId == null)
 					throw new KeyNotFoundException("المطعم غير موجود");
 
-				// 2. إضافة التبرع بدون userId
 				var sql = @"
 			INSERT INTO Donation 
 				(RestaurantId,Quantity, DateDonated)

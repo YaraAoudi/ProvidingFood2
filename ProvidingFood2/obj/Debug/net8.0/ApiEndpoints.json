@@ -1,5 +1,94 @@
 [
   {
+    "ContainingType": "ProvidingFood2.Controllers.BeneficiaryController",
+    "Method": "AddBeneficiary",
+    "RelativePath": "api/Beneficiary",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "beneficiary",
+        "Type": "ProvidingFood2.Model.Beneficiary",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.BeneficiaryController",
+    "Method": "GetBeneficiaries",
+    "RelativePath": "api/Beneficiary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.DonationIndividalController",
+    "Method": "AddDonation",
+    "RelativePath": "api/DonationIndividal/add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ProvidingFood2.DTO.DonorDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.DonationIndividalController",
+    "Method": "GetAllDonations",
+    "RelativePath": "api/DonationIndividal/all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.DonationIndividalController",
+    "Method": "GetMyDonations",
+    "RelativePath": "api/DonationIndividal/my-donations",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.DonationIndividalController",
+    "Method": "UpdateStatus",
+    "RelativePath": "api/DonationIndividal/update-status",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "requesId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "ProvidingFood2.Controllers.DonationRestaurantController",
     "Method": "GetDonations",
     "RelativePath": "api/DonationRestaurant",
@@ -26,64 +115,74 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "ProvidingFood2.Controllers.QRController",
-    "Method": "GetVoucherDetails",
-    "RelativePath": "api/QR/details/{voucherId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "voucherId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "ProvidingFood2.Controllers.QRController",
-    "Method": "GenerateVoucher",
-    "RelativePath": "api/QR/generate",
+    "ContainingType": "ProvidingFood2.Controllers.FoodBondController",
+    "Method": "CreateFoodBond",
+    "RelativePath": "api/FoodBond",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "request",
-        "Type": "ProvidingFood2.DTO.GenerateVoucherRequestDto",
+        "Type": "ProvidingFood2.DTO.FoodBondCreateRequest",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "ProvidingFood2.Controllers.QRController",
-    "Method": "RevokeVoucher",
-    "RelativePath": "api/QR/revoke/{voucherId}",
-    "HttpMethod": "POST",
+    "ContainingType": "ProvidingFood2.Controllers.FoodBondController",
+    "Method": "GetAllFoodBonds",
+    "RelativePath": "api/FoodBond",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
-      {
-        "Name": "voucherId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "ProvidingFood2.Controllers.QRController",
-    "Method": "ValidateVoucher",
-    "RelativePath": "api/QR/validate/{voucherId}",
+    "ContainingType": "ProvidingFood2.Controllers.FoodBondController",
+    "Method": "GetFoodBond",
+    "RelativePath": "api/FoodBond/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "voucherId",
+        "Name": "id",
         "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.FoodBondController",
+    "Method": "ConfirmReceipt",
+    "RelativePath": "api/FoodBond/confirm",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProvidingFood2.DTO.ConfirmRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.FoodBondController",
+    "Method": "ScanQRCode",
+    "RelativePath": "api/FoodBond/scan",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProvidingFood2.DTO.ScanRequest",
         "IsRequired": true
       }
     ],
@@ -158,6 +257,22 @@
       {
         "Name": "loginDto",
         "Type": "ProvidingFood2.DTO.LoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.UserController",
+    "Method": "RegisterDonor",
+    "RelativePath": "api/User/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProvidingFood2.DTO.UserDto",
         "IsRequired": true
       }
     ],
