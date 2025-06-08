@@ -40,7 +40,8 @@ namespace ProvidingFood2.Controllers
 				var success = await _donationResturant.AddDonationAsync(
 					request.RestaurantName,
 					request.Quantity,
-					request.DateDonated);
+					request.DateDonated,
+					request.DeliveryLocation);
 
 				if (success)
 					return Ok(new { message = "تمت إضافة التبرع بنجاح" });

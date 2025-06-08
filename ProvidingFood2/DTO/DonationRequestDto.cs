@@ -14,7 +14,10 @@ namespace ProvidingFood2.DTO
 
 		[Required]
 		public string RestaurantName { get; set; }
-	
+
+		[Required]
+		public string DeliveryLocation { get; set; }
+
 
 	}
 }
