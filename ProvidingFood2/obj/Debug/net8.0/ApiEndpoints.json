@@ -26,6 +26,38 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "ProvidingFood2.Controllers.BeneficiaryController",
+    "Method": "DeleteBeneficiary",
+    "RelativePath": "api/Beneficiary/delete/{BeneficiaryId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "BeneficiaryId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.BeneficiaryController",
+    "Method": "UpdateBeneficiary",
+    "RelativePath": "api/Beneficiary/update",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "beneficiary",
+        "Type": "ProvidingFood2.Model.Beneficiary",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "ProvidingFood2.Controllers.DonationIndividalController",
     "Method": "AddDonation",
     "RelativePath": "api/DonationIndividal/add",
@@ -248,6 +280,32 @@
   },
   {
     "ContainingType": "ProvidingFood2.Controllers.UserController",
+    "Method": "AddAdmin",
+    "RelativePath": "api/User/add-admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "adminDto",
+        "Type": "ProvidingFood2.DTO.AdminCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.UserController",
+    "Method": "GetAdminDashboard",
+    "RelativePath": "api/User/admin/dashboard",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.UserController",
     "Method": "Login",
     "RelativePath": "api/User/login",
     "HttpMethod": "POST",
@@ -276,6 +334,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProvidingFood2.Controllers.UserController",
+    "Method": "GetUserProfile",
+    "RelativePath": "api/User/user/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

@@ -6,5 +6,7 @@ namespace ProvidingFood2.Repository
 	{
 		Task<int> AddBeneficiaryAsync(Beneficiary beneficiary);
 		Task<IEnumerable<Beneficiary>> GetAllBeneficiariesAsync();
+		Task<bool> DeleteBeneficiariesUserAsync(int BeneficiaryId);
+		Task<bool> UpdateBeneficiaryAsync(Beneficiary newBeneficiary);
 	}
 }

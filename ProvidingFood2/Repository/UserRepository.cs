@@ -1,6 +1,10 @@
 ﻿using ProvidingFood2.Model;
 using Dapper;
 using System.Data.SqlClient;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 
 
@@ -58,24 +62,48 @@ namespace ProvidingFood2.Repository
 			}
 		}
 
-
-
-		public async Task<LoginResult> Login(Login login)
+		public async Task<bool> AddAdminUserAsync(User user, string userTypeName, string position)
 		{
-			using (var connection = new SqlConnection(_connectionString))
+			// إضافة المستخدم الأساسي والحصول على UserId
+			int userId = await AddBaseUserAsync(user, userTypeName);
+
+			await using (var connection = new SqlConnection(_connectionString))
 			{
 				await connection.OpenAsync();
 
-				
+				string insertAdminQuery = @"
+        INSERT INTO [Admin] 
+            (UserId, Position, CreatedAt)
+        VALUES 
+            (@UserId, @Position, @CreatedAt);";
+
+				var parameters = new
+				{
+					UserId = userId,
+					Position = position,
+					CreatedAt = DateTime.UtcNow // أو DateTime.Now حسب توقيتك
+				};
+
+				int rows = await connection.ExecuteAsync(insertAdminQuery, parameters);
+				return rows > 0;
+			}
+		}
+
+
+
+		public async Task<LoginResult> Login(Login login)
+			{
+				using var connection = new SqlConnection(_connectionString);
+				await connection.OpenAsync();
+
 				var userQuery = @"
-		SELECT u.UserId, u.Password, u.FullName, u.UserTypeId, ut.TypeName
-		FROM [User] u
-		JOIN UserType ut ON u.UserTypeId = ut.UserTypeId
-		WHERE u.Email = @Email";
+SELECT u.UserId, u.Password, u.FullName, u.UserTypeId, ut.TypeName
+FROM [User] u
+JOIN UserType ut ON u.UserTypeId = ut.UserTypeId
+WHERE u.Email = @Email";
 
 				var user = await connection.QueryFirstOrDefaultAsync<dynamic>(userQuery, new { login.Email });
 
-				// التحقق من صحة البريد وكلمة المرور
 				if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, (string)user.Password))
 				{
 					return new LoginResult
@@ -85,63 +113,67 @@ namespace ProvidingFood2.Repository
 					};
 				}
 
-				// التحقق إذا كان مشرف
-				var adminQuery = "SELECT * FROM [Admin] WHERE UserId = @UserId";
-				var adminInfo = await connection.QueryFirstOrDefaultAsync<dynamic>(adminQuery, new { UserId = user.UserId });
+				int userId = user.UserId;
+				string fullName = user.FullName;
+				int userTypeId = user.UserTypeId;
+				string role = "Unknown";
 
-				if (adminInfo != null)
-				{
-					return new LoginResult
-					{
-						Success = true,
-						UserId = user.UserId,
-						FullName = user.FullName,
-						UserTypeId = 2,
-						Message = "تم تسجيل الدخول بنجاح كمشرف"
-					};
-				}
+				// تحقق نوع المستخدم
+				var admin = await connection.QueryFirstOrDefaultAsync("SELECT 1 FROM [Admin] WHERE UserId = @UserId", new { UserId = userId });
+				if (admin != null)
+					role = "Admin";
 
-				// التحقق إذا كان صاحب مطعم
-				var restaurantQuery = "SELECT * FROM [Restaurant] WHERE UserId = @UserId";
-				var restaurantInfo = await connection.QueryFirstOrDefaultAsync<dynamic>(restaurantQuery, new { UserId = user.UserId });
+				var restaurant = await connection.QueryFirstOrDefaultAsync("SELECT 1 FROM [Restaurant] WHERE UserId = @UserId", new { UserId = userId });
+				if (restaurant != null)
+					role = "Restaurant";
 
-				if (restaurantInfo != null)
-				{
-					return new LoginResult
-					{
-						Success = true,
-						UserId = user.UserId,
-						FullName = user.FullName,
-						UserTypeId = 1,
-						Message = "تم تسجيل الدخول بنجاح كصاحب مطعم"
-					};
-				}
-
-				// التحقق إذا كان متبرع
 				if ((string)user.TypeName == "Donor")
-				{
-					return new LoginResult
-					{
-						Success = true,
-						UserId = user.UserId,
-						FullName = user.FullName,
-						UserTypeId = user.UserTypeId,
-						Message = "تم تسجيل الدخول بنجاح كمتبرع"
-					};
-				}
+					role = "Donor";
 
-				// في حال لم يتم تحديد نوع المستخدم
+				// توليد التوكن
+				string token = GenerateJwtToken(userId, fullName, userTypeId, role);
+
+				// نتيجة تسجيل الدخول
 				return new LoginResult
 				{
-					Success = false,
-					Message = "لم يتم العثور على بيانات المستخدم في النظام"
+					Success = true,
+					UserId = userId,
+					FullName = fullName,
+					UserTypeId = userTypeId,
+					Token = token,
+					Message = $"تم تسجيل الدخول بنجاح كـ {role}"
 				};
+			}
+
+			private string GenerateJwtToken(int userId, string fullName, int userTypeId, string role)
+			{
+				var jwtSettings = _configuration.GetSection("JwtSettings");
+				var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
+				var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+				var claims = new[]
+				{
+			new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+			new Claim("fullName", fullName),
+			new Claim("userTypeId", userTypeId.ToString()),
+			new Claim(ClaimTypes.Role, role),
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+		};
+
+				var token = new JwtSecurityToken(
+					issuer: jwtSettings["Issuer"],
+					audience: jwtSettings["Audience"],
+					claims: claims,
+					expires: DateTime.UtcNow.AddHours(2),
+					signingCredentials: creds
+				);
+
+				return new JwtSecurityTokenHandler().WriteToken(token);
 			}
 		}
 
 
 
-
 	}
-}
+
 

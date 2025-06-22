@@ -15,13 +15,23 @@ namespace ProvidingFood2.Repository
 		}
 		
 		/////////////////function to return all reasturant in Restaurant Table///////////////////////////
-		public async Task<IEnumerable<Restaurant>> GetRestaurantAsync()
+		public async Task<IEnumerable<RestaurantGetInfo>> GetRestaurantAsync()
 		{
 			using (var connection = new SqlConnection(_connectionString))
 			{
 				await connection.OpenAsync();
-				string query = "SELECT * FROM [Restaurant]";
-				return await connection.QueryAsync<Restaurant>(query);
+				string query = @"SELECT r.RestaurantId,
+                r.UserId,
+				r.RestaurantName,
+                r.RestaurantEmail,
+				r.Address,
+				r.RestaurantPhone,
+				c.Name AS CategoryName 
+                FROM 
+				Restaurant r
+			INNER JOIN 
+				Category c ON r.CategoryId = c.CategoryId";
+				return await connection.QueryAsync<RestaurantGetInfo>(query);
 			}
 		}
 
@@ -111,6 +121,8 @@ namespace ProvidingFood2.Repository
 				return rows > 0;
 			}
 		}
+
+	
 
 
 		///////////////////function Delet restaurant from Restaurant Table/////////////////////////////

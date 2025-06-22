@@ -40,6 +40,84 @@ namespace ProvidingFood2.Controllers
 			var restaurants = await _repo.GetAllBeneficiariesAsync();
 			return Ok(restaurants);
 		}
+		[HttpPut("update")]
+		public async Task<IActionResult> UpdateBeneficiary([FromBody] Beneficiary beneficiary)
+		{
+			if (beneficiary == null || beneficiary.BeneficiaryId == 0)
+			{
+				return BadRequest(new
+				{
+					Success = false,
+					Message = "يجب توفير بيانات المستفيد ومعرّف صالح"
+				});
+			}
+
+			try
+			{
+				bool result = await _repo.UpdateBeneficiaryAsync(beneficiary);
+
+				if (!result)
+				{
+					return NotFound(new
+					{
+						Success = false,
+						Message = "المستفيد غير موجود أو لم يتم تعديل أي بيانات"
+					});
+				}
+
+				return Ok(new
+				{
+					Success = true,
+					Message = "تم تحديث بيانات المستفيد بنجاح"
+				});
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, new
+				{
+					Success = false,
+					Message = "حدث خطأ أثناء محاولة تحديث بيانات المستفيد",
+					Error = ex.Message
+				});
+			}
+		}
+			[HttpDelete("delete/{BeneficiaryId}")]
+		public async Task<IActionResult> DeleteBeneficiary(int BeneficiaryId)
+		{
+			try
+			{
+				bool isDeleted = await _repo.DeleteBeneficiariesUserAsync(BeneficiaryId);
+
+				if (isDeleted)
+				{
+					return Ok(new
+					{
+						Success = true,
+						Message = "تم حذف المستفيد بنجاح"
+					});
+				}
+				else
+				{
+					return NotFound(new
+					{
+						Success = false,
+						Message = "لم يتم العثور على المستفيد"
+					});
+				}
+			}
+			catch (System.Exception ex)
+			{
+
+
+
+				return StatusCode(500, new
+				{
+					Success = false,
+					Message = "حدث خطأ أثناء محاولة حذف المستفيد",
+					Error = ex.Message
+				});
+			}
+		}
 
 
 	}

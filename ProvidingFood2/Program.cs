@@ -1,4 +1,7 @@
 using ProvidingFood2.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 
@@ -17,6 +20,23 @@ builder.Services.AddCors(options =>
 		});
 });
 
+builder.Services.AddAuthentication("Bearer")
+	.AddJwtBearer("Bearer", options =>
+	{
+		var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateLifetime = true,
+			ValidateIssuerSigningKey = true,
+			ValidIssuer = jwtSettings["Issuer"],
+			ValidAudience = jwtSettings["Audience"],
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
+		};
+	});
+
+builder.Services.AddAuthorization();
 
 
 
@@ -57,7 +77,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseSession(); 
+app.UseSession();
+app.UseAuthentication();
 
 
 
