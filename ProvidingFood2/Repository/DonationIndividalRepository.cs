@@ -96,7 +96,7 @@ namespace ProvidingFood2.Repository
 			await connection.OpenAsync();
 
 			var sql = @"
-        SELECT dr.FoodName, dr.Description, dr.Country, dr.Vegetarian, d.Name AS Status
+        SELECT dr.FoodId ,dr.FoodName, dr.Description, dr.Country, dr.Vegetarian, d.Name AS Status 
         FROM DonationRequest dr
         INNER JOIN [User] u ON dr.UserId = u.UserId
         INNER JOIN Donation_Request_Status d ON dr.RequesId = d.RequesId";
